@@ -8,8 +8,9 @@
 import Foundation
 import CoreData
 
-class TodoRepository: ObservableObject {
-    @Published var todos: [TodoItem] = []
+class TodoRepository {
+    static let shared = TodoRepository()
+    
     private let url = "https://dummyjson.com/todos"
     
     func fetch(context: NSManagedObjectContext) {
@@ -27,19 +28,20 @@ class TodoRepository: ObservableObject {
             
             if response.statusCode == 200 {
                 guard let data = data else { return }
-            
-            DispatchQueue.main.async {
-                do {
-                    
-                    let decodedTodo = try JSONDecoder().decode(TodoModel.self, from: data)
-                    self.todos = decodedTodo.todos
-                    saveTodosCoreData(decodedTodo.todos)
-                } catch let error {
-                    print("Error decoding: ", error)
+                
+                DispatchQueue.main.async {
+                    do {
+                        
+                        let decodedTodo = try JSONDecoder().decode(TodoModel.self, from: data)
+                        saveTodosCoreData(decodedTodo.todos)
+                    } catch let error {
+                        print("Error decoding: ", error)
+                    }
                 }
-            }}
+            }
         }
         
         dataTask.resume()
     }
+    
 }
